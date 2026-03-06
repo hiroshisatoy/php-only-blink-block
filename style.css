@@ -1,0 +1,41 @@
+/* Blink ブロックの基本スタイルです。 */
+.blink-block {
+	display: block;
+}
+
+/* テキスト要素をアニメーション対象にします。 */
+.blink-block__text {
+	display: inline-block;
+	animation-timing-function: ease-in-out;
+	animation-iteration-count: infinite;
+}
+
+/* 表示/非表示モード: 完全に消える点滅 */
+.blink-block__text--visibility {
+	animation-name: blink-visibility;
+	animation-duration: var(--blink-duration, 1.6s);
+}
+
+@keyframes blink-visibility {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+}
+
+/* 薄くするモード: 透明度を下げる点滅 */
+.blink-block__text--opacity {
+	animation-name: blink-opacity;
+	animation-duration: var(--blink-duration, 1.6s);
+}
+
+@keyframes blink-opacity {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.2;
+	}
+}
