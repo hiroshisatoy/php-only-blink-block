@@ -3,7 +3,7 @@
  * Plugin Name: Blink Block
  * Description: CSS アニメーションで点滅を制御する、PHPのみで構成された点滅ブロックです。
  * Author:      Hiroshi Sato
- * Version:     1.0.0
+ * Version:     1.0.1
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * License:     GPL-2.0-or-later
@@ -13,19 +13,15 @@
 defined( 'ABSPATH' ) || exit;
 define( 'BLINK_BLOCK_VERSION', get_file_data( __FILE__, array( 'Version' => 'Version' ), 'plugin' )['Version'] );
 
-// ---------------------------------------------------------------------------
-// ブロック登録
-// ---------------------------------------------------------------------------
-
 function blink_block_register() {
 	register_block_type(
 		'original-plugin/blink',
 		array(
 			'title'       => 'Blink',
-			'description' => '単一のアニメーションテキスト行を表示します。複数のブロックを重ねると複数行のレイアウトを作れます。',
+			'description' => 'Blinkタグを再現した点滅するブロックです。',
 			'category'    => 'text',
 			'icon'        => 'star-half',
-			'attributes' => array( // ブロック属性 ブロックの設定項目を宣言し、設定パネルなどでブロック固有のパラメーターを設定できるようにする。
+			'attributes' => array(
 				'text' => array(
 					'type'    => 'string',
 					'default' => 'このテキストが点滅します',
@@ -33,7 +29,7 @@ function blink_block_register() {
 				),
 				'speed' => array(
 					'type'    => 'string',
-					'enum'    => array( '遅い', '通常', '速い', 'とても速い', ),
+					'enum'    => array( '遅い', '通常', '速い', 'とても速い' ),
 					'default' => '通常',
 					'label'   => '点滅速度',
 				),
@@ -44,19 +40,12 @@ function blink_block_register() {
 					'label'   => '点滅方式',
 				),
 			),
-			'supports' => array( // ブロックサポート ブロックの機能を宣言し、設定パネルなどでフォント設定や背景色変更などができるようにする。
+			'supports' => array(
 				'autoRegister' => true,
 				'align'        => array( 'wide', 'full' ),
-				'color'        => array(
-					'text'       => true,
-					'background' => true,
-				),
+				'color'        => array( 'text' => true, 'background' => true ),
 				'spacing'    => array( 'padding' => true, 'margin' => true ),
-				'typography' => array(
-					'fontSize'   => true,
-					'lineHeight' => true,
-					'textAlign' => true,
-				),
+				'typography' => array( 'fontSize' => true, 'lineHeight' => true, 'textAlign' => true ),
 				'shadow' => true
 			),
 			'render_callback' => 'blink_block_render',
@@ -65,14 +54,7 @@ function blink_block_register() {
 }
 add_action( 'init', 'blink_block_register' );
 
-// ---------------------------------------------------------------------------
-// レンダリング処理
-// 保存された属性をもとに、フロント表示用の HTML を返します。
-// ---------------------------------------------------------------------------
-
 function blink_block_render( array $attributes, string $content, WP_Block $block ) {
-	// 管理画面で選んだ速度ラベルを、アニメーション1周期の長さ（ミリ秒）へ変換します。
-	// 1周期 = 表示時間 + 非表示時間 なので、間隔の2倍です。
 	$speed_map = array(
 		'遅い'      => 2400,
 		'通常'      => 1600,
@@ -83,10 +65,13 @@ function blink_block_render( array $attributes, string $content, WP_Block $block
 	$duration_ms = $speed_map[ $attributes['speed'] ] ?? 1600;
 	$mode        = $attributes['mode'] ?? '表示/非表示';
 
-	$mode_class = ( $mode === '薄くする' ) ? 'blink-block__text--opacity' : 'blink-block__text--visibility';
-	$style      = sprintf( '--blink-duration: %dms', $duration_ms );
+	if ( $mode === '薄くする' ) {
+		$mode_class = 'blink-block__text--opacity';
+	} else {
+		$mode_class = 'blink-block__text--visibility';
+	}
+	$style = sprintf( '--blink-duration: %dms', $duration_ms );
 
-	// ブロックサポート由来の class や style を自動付与します。
 	$wrapper_attrs = get_block_wrapper_attributes(
 		array( 'class' => 'blink-block' )
 	);
@@ -99,11 +84,6 @@ function blink_block_render( array $attributes, string $content, WP_Block $block
 		esc_html( $attributes['text'] )
 	);
 }
-
-// ---------------------------------------------------------------------------
-// スタイル登録
-// フロント用とエディター用で同じ CSS を利用します。
-// ---------------------------------------------------------------------------
 
 function blink_block_register_styles() {
 	wp_enqueue_block_style(
